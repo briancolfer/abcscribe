@@ -9,6 +9,8 @@ abort("The Rails environment is running in production mode!") if Rails.env.produ
 # return unless Rails.env.test?
 require 'rspec/rails'
 # Add additional requires below this line. Rails is not loaded until this point!
+require 'factory_bot_rails'
+require 'faker'
 
 # Requires supporting ruby files with custom matchers and macros, etc, in
 # spec/support/ and its subdirectories. Files matching `spec/**/*_spec.rb` are
@@ -23,7 +25,9 @@ require 'rspec/rails'
 # directory. Alternatively, in the individual `*_spec.rb` files, manually
 # require only the support files necessary.
 #
-# Rails.root.glob('spec/support/**/*.rb').sort_by(&:to_s).each { |f| require f }
+# Enable requiring support files
+# Enable requiring support files
+Dir[Rails.root.join('spec/support/**/*.rb')].sort.each { |f| require f }
 
 # Ensures that the test database schema matches the current schema file.
 # If there are pending migrations it will invoke `db:test:prepare` to
@@ -69,4 +73,39 @@ RSpec.configure do |config|
   config.filter_rails_from_backtrace!
   # arbitrary gems may also be filtered via:
   # config.filter_gems_from_backtrace("gem name")
+  
+  # Include FactoryBot methods
+  config.include FactoryBot::Syntax::Methods
+  
+  # Include authentication helpers for controller and request specs
+  config.include AuthenticationHelpers, type: :request
+  config.include AuthenticationHelpers, type: :controller
+
+  # Configure request specs
+  config.before(:each, type: :request) do
+    # Allow accessing session in request specs
+    def session
+      defined?(@session) ? @session : @session = {}
+    end
+
+    # Allow accessing flash in request specs
+    def flash
+      defined?(@flash) ? @flash : @flash = ActionDispatch::Flash::FlashHash.new
+    end
+  end
+
+  # Configure controller specs
+  config.before(:each, type: :controller) do
+    # Allow accessing session in controller specs
+    def session
+      defined?(@session) ? @session : @session = {}
+    end
+  end
+
+  # Clear session between tests
+  config.after(:each) do
+    @session = nil
+    @flash = nil
+    @_current_user = nil
+  end
 end
