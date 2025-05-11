@@ -1,0 +1,52 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900">Observations for <%= @subject.name %></h1>
+      <p class="mt-1 text-sm text-gray-500">All recorded observations</p>
+    </div>
+    <%= link_to "New Observation", new_subject_observation_path(@subject), 
+        class: "inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+  </div>
+
+  <div class="bg-white shadow overflow-hidden sm:rounded-md">
+    <ul role="list" class="divide-y divide-gray-200">
+      <% @observations.each do |observation| %>
+        <li>
+          <%= link_to observation_path(observation), class: "block hover:bg-gray-50" do %>
+            <div class="px-4 py-4 sm:px-6">
+              <div class="flex items-center justify-between">
+                <p class="text-sm font-medium text-indigo-600 truncate">
+                  <%= observation.observed_at.strftime("%B %d, %Y at %I:%M %p") %>
+                </p>
+                <div class="ml-2 flex-shrink-0 flex">
+                  <% if observation.setting %>
+                    <p class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                      <%= observation.setting.name %>
+                    </p>
+                  <% end %>
+                </div>
+              </div>
+              <div class="mt-2 sm:flex sm:justify-between">
+                <div class="sm:flex">
+                  <p class="flex items-center text-sm text-gray-500">
+                    <%= truncate(observation.behavior, length: 100) %>
+                  </p>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+
+  <div class="mt-6">
+    <%= paginate @observations %>
+  </div>
+
+  <div class="mt-6">
+    <%= link_to "Back to #{@subject.name}", subject_path(@subject), 
+        class: "text-indigo-600 hover:text-indigo-900" %>
+  </div>
+</div>
+

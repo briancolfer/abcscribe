@@ -10,7 +10,45 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_10_184728) do
+ActiveRecord::Schema[8.0].define(version: 2025_05_11_220733) do
+  create_table "observations", force: :cascade do |t|
+    t.datetime "observed_at", null: false
+    t.text "antecedent", null: false
+    t.text "behavior", null: false
+    t.text "consequence", null: false
+    t.text "notes"
+    t.integer "user_id", null: false
+    t.integer "subject_id", null: false
+    t.integer "setting_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["observed_at"], name: "index_observations_on_observed_at"
+    t.index ["setting_id"], name: "index_observations_on_setting_id"
+    t.index ["subject_id"], name: "index_observations_on_subject_id"
+    t.index ["user_id"], name: "index_observations_on_user_id"
+  end
+
+  create_table "settings", force: :cascade do |t|
+    t.string "name", null: false
+    t.text "description"
+    t.integer "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id", "name"], name: "index_settings_on_user_id_and_name", unique: true
+    t.index ["user_id"], name: "index_settings_on_user_id"
+  end
+
+  create_table "subjects", force: :cascade do |t|
+    t.string "name", null: false
+    t.date "date_of_birth"
+    t.text "notes"
+    t.integer "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id", "name"], name: "index_subjects_on_user_id_and_name", unique: true
+    t.index ["user_id"], name: "index_subjects_on_user_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email"
     t.string "password_digest"
@@ -19,7 +57,15 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_10_184728) do
     t.datetime "updated_at", null: false
     t.string "remember_token"
     t.datetime "remember_created_at"
+    t.string "api_token"
+    t.index ["api_token"], name: "index_users_on_api_token", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["remember_token"], name: "index_users_on_remember_token", unique: true
   end
+
+  add_foreign_key "observations", "settings"
+  add_foreign_key "observations", "subjects"
+  add_foreign_key "observations", "users"
+  add_foreign_key "settings", "users"
+  add_foreign_key "subjects", "users"
 end

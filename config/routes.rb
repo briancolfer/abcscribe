@@ -17,4 +17,23 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   root "home#index"
+
+  # Resource routes
+  resources :subjects do
+    resources :observations, shallow: true
+  end
+  resources :settings
+
+  # API routes
+  namespace :api, defaults: { format: :json } do
+    namespace :v1 do
+      post 'auth/login', to: 'authentication#create'
+      delete 'auth/logout', to: 'authentication#destroy'
+      
+      resources :subjects do
+        resources :observations, shallow: true
+      end
+      resources :settings
+    end
+  end
 end

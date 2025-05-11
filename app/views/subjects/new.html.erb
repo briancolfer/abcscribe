@@ -1,0 +1,12 @@
+<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">New Subject</h1>
+  </div>
+
+  <%= render "form", subject: @subject %>
+
+  <div class="mt-4">
+    <%= link_to "Back to subjects", subjects_path, class: "text-indigo-600 hover:text-indigo-900" %>
+  </div>
+</div>
+
