@@ -41,6 +41,7 @@
         <nav>
           <ul class="flex space-x-4">
             <% if logged_in? %>
+              <li class="text-gray-300"><%= current_user.name %></li>
               <li><%= link_to "My Account", "#", class: "hover:text-gray-300" %></li>
               <li><%= button_to "Logout", logout_path, method: :delete, class: "hover:text-gray-300" %></li>
             <% else %>
