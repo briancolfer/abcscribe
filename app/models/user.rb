@@ -71,4 +71,6 @@ class User < ApplicationRecord
   has_many :subjects, dependent: :destroy
   has_many :settings, dependent: :destroy
   has_many :observations, dependent: :destroy
+  has_many :behaviors, dependent: :destroy
+  has_many :journal_entries, dependent: :destroy
 end

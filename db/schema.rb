@@ -10,7 +10,28 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_11_220733) do
+ActiveRecord::Schema[8.0].define(version: 2025_05_23_183623) do
+  create_table "behaviors", force: :cascade do |t|
+    t.string "name"
+    t.integer "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name", "user_id"], name: "index_behaviors_on_name_and_user_id", unique: true
+    t.index ["user_id"], name: "index_behaviors_on_user_id"
+  end
+
+  create_table "journal_entries", force: :cascade do |t|
+    t.datetime "occurred_at"
+    t.text "consequence"
+    t.integer "reinforcement_type"
+    t.integer "user_id", null: false
+    t.integer "behavior_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["behavior_id"], name: "index_journal_entries_on_behavior_id"
+    t.index ["user_id"], name: "index_journal_entries_on_user_id"
+  end
+
   create_table "observations", force: :cascade do |t|
     t.datetime "observed_at", null: false
     t.text "antecedent", null: false
@@ -63,6 +84,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_11_220733) do
     t.index ["remember_token"], name: "index_users_on_remember_token", unique: true
   end
 
+  add_foreign_key "behaviors", "users"
+  add_foreign_key "journal_entries", "behaviors"
+  add_foreign_key "journal_entries", "users"
   add_foreign_key "observations", "settings"
   add_foreign_key "observations", "subjects"
   add_foreign_key "observations", "users"
