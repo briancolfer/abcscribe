@@ -36,4 +36,9 @@ module AuthenticationHelpers
       expires: 2.weeks.from_now
     }
   end
+
+  # Generate authorization headers for a given token
+  def auth_headers(token)
+    { "Authorization" => "Bearer #{token}" }
+  end
 end

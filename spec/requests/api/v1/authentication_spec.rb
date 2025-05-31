@@ -14,18 +14,28 @@ RSpec.describe "Api::V1::Authentication", type: :request do
     context "with valid credentials" do
       it "returns JWT token" do
         post "/api/v1/auth/login", params: valid_credentials
-        
+
         expect(response).to have_http_status(:created)
         expect(json_response['data']['attributes']['token']).to be_present
         expect(json_response['data']['attributes']['email']).to eq(user.email)
       end
 
+      it "returns an authentication token" do
+        post "/api/v1/auth/login", params: valid_credentials
+        puts "DEBUG: Response body: #{response.body}"
+        puts "DEBUG: Response status: #{response.status}"
+        token = json_response['data']['attributes']['token']
+        json_parse = JSON.parse(response.body)
+        puts "DEBUG: Parsed JSON: #{json_parse.inspect}"
+        expect(response).to have_http_status(:created)
+        expect(JSON.parse(response.body)["data"]["attributes"]["token"]).to be_present
+      end
+
       it "returns token that can be used for authentication" do
         post "/api/v1/auth/login", params: valid_credentials
         token = json_response['data']['attributes']['token']
-        
         get "/api/v1/subjects", headers: auth_headers(token)
-        expect(response).to have_http_status(:success)
+        expect(response).to have_http_status(:ok)
       end
     end
 
@@ -35,7 +45,7 @@ RSpec.describe "Api::V1::Authentication", type: :request do
           email: user.email,
           password: "wrong_password"
         }
-        
+
         expect(response).to have_http_status(:unauthorized)
         expect(json_response['errors'].first['detail']).to eq("Invalid email or password")
       end
@@ -45,7 +55,7 @@ RSpec.describe "Api::V1::Authentication", type: :request do
           email: "nonexistent@example.com",
           password: "password123"
         }
-        
+
         expect(response).to have_http_status(:unauthorized)
         expect(json_response['errors'].first['detail']).to eq("Invalid email or password")
       end
@@ -61,7 +71,7 @@ RSpec.describe "Api::V1::Authentication", type: :request do
 
       it "invalidates the token" do
         delete "/api/v1/auth/logout", headers: auth_headers(@token)
-        
+
         expect(response).to have_http_status(:no_content)
         user.reload
         expect(user.api_token).to be_nil
@@ -70,7 +80,7 @@ RSpec.describe "Api::V1::Authentication", type: :request do
       it "prevents further use of the invalidated token" do
         delete "/api/v1/auth/logout", headers: auth_headers(@token)
         get "/api/v1/subjects", headers: auth_headers(@token)
-        
+
         expect(response).to have_http_status(:unauthorized)
       end
     end
