@@ -1,5 +1,6 @@
 class User < ApplicationRecord
   has_secure_password
+  has_many :magic_link_tokens, dependent: :delete_all
 
   validates :email, presence: true, 
                    uniqueness: { case_sensitive: false },
@@ -12,7 +13,7 @@ class User < ApplicationRecord
 
   # Converts email to lowercase before saving
   before_save :downcase_email
-  
+
   # Remember token methods
   def remember
     self.remember_token = User.generate_token

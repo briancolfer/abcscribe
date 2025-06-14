@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_23_183623) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_14_000428) do
   create_table "behaviors", force: :cascade do |t|
     t.string "name"
     t.integer "user_id", null: false
@@ -25,11 +25,20 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_23_183623) do
     t.text "consequence"
     t.integer "reinforcement_type"
     t.integer "user_id", null: false
-    t.integer "behavior_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["behavior_id"], name: "index_journal_entries_on_behavior_id"
+    t.text "antecedent"
+    t.text "behavior"
     t.index ["user_id"], name: "index_journal_entries_on_user_id"
+  end
+
+  create_table "magic_link_tokens", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "token"
+    t.datetime "expires_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_magic_link_tokens_on_user_id"
   end
 
   create_table "observations", force: :cascade do |t|
@@ -85,8 +94,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_23_183623) do
   end
 
   add_foreign_key "behaviors", "users"
-  add_foreign_key "journal_entries", "behaviors"
   add_foreign_key "journal_entries", "users"
+  add_foreign_key "magic_link_tokens", "users"
   add_foreign_key "observations", "settings"
   add_foreign_key "observations", "subjects"
   add_foreign_key "observations", "users"

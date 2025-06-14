@@ -60,16 +60,17 @@ RSpec.describe "Sessions", type: :request do
     it "logs out the user" do
       sign_in(user)
       remember_user(user)
-      
+
       # Store token before logout for comparison
       token_before = cookies[:remember_token]
       expect(token_before).to be_present
-      
+      # Perform logout
       delete logout_path
+      expect(response).to have_http_status(:found)
+      # follow the redirect
       follow_redirect!
       expect(response).to have_http_status(:success)
       expect(response.body).to include("You have been logged out")
-      
       # Cookie is either nil or blank after logout
       expect(cookies[:remember_token].to_s).to be_empty
     end

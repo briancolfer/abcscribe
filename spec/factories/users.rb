@@ -5,6 +5,11 @@ FactoryBot.define do
     password { "password123" }
     password_confirmation { "password123" }
     
+    # Generate API token after creation for API testing
+    after(:create) do |user|
+      user.generate_api_token
+    end
+    
     # User with short password (for validation testing)
     trait :with_short_password do
       password { "short" }

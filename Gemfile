@@ -41,6 +41,8 @@ group :development, :test do
   gem "rspec-rails", "~> 8.0"
   gem "factory_bot_rails", "~> 6.4"
   gem "faker", "~> 3.5"
+  gem "letter_opener", "~> 1.0" # For previewing emails in development
+  gem "shoulda-matchers", "~> 6.1"
   gem "rswag"              # For API documentation
 end
 
@@ -50,8 +52,8 @@ end
 group :test do
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
   gem "capybara"
+  gem "rack_session_access"
   gem "selenium-webdriver"
-  gem "shoulda-matchers", "~> 6.1"
 end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem

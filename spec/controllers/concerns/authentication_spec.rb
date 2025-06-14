@@ -15,6 +15,8 @@ RSpec.describe ApplicationController, type: :controller do
     end
   end
 
+  let(:user) { create(:user) }
+
   before do
     routes.draw do
       get 'protected_action' => 'anonymous#protected_action'
@@ -23,13 +25,13 @@ RSpec.describe ApplicationController, type: :controller do
     end
   end
 
-  let(:user) { create(:user) }
 
   describe '#authenticate_user' do
     context 'when user is logged in' do
       before do
         allow(controller).to receive(:current_user).and_return(user)
         allow(controller).to receive(:logged_in?).and_return(true)
+        @request.session[:user_id] = user.id
       end
 
       it 'allows access to the action' do

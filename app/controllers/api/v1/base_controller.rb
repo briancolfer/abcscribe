@@ -3,6 +3,7 @@ module Api
     class BaseController < ApplicationController
       protect_from_forgery with: :null_session
       skip_before_action :verify_authenticity_token
+      skip_before_action :authenticate_user!
       before_action :set_default_format
       before_action :authenticate_api_request
 
@@ -19,9 +20,9 @@ module Api
         token = header.split(' ').last
         decoded = JsonWebToken.decode(token)
 
-        if decoded
+        if decoded && decoded[:user_id]
           @current_user = User.find_by(id: decoded[:user_id])
-          render_unauthorized unless @current_user&.api_token.present?
+          render_unauthorized unless @current_user
         else
           render_unauthorized
         end
