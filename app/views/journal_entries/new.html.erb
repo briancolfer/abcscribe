@@ -1,0 +1,17 @@
+<div class="w-full max-w-4xl mx-auto">
+  <div class="flex justify-between items-center mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">New ABC Journal Entry</h1>
+    <%= link_to "Back to Entries", journal_entries_path, class: "bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded" %>
+  </div>
+  
+  <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-8">
+    <div class="mb-6">
+      <h2 class="text-lg font-semibold text-gray-800 mb-2">ABC Analysis Guide</h2>
+      <p class="text-sm text-gray-600">
+        Document objective, observable events only. Focus on what actually happened, not feelings or interpretations.
+      </p>
+    </div>
+    
+    <%= render 'form', journal_entry: @journal_entry %>
+  </div>
+</div>

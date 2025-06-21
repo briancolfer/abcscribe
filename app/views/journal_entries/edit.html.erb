@@ -1,0 +1,23 @@
+<div class="w-full max-w-4xl mx-auto">
+  <div class="flex justify-between items-center mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">Edit Journal Entry</h1>
+    <div class="flex space-x-3">
+      <%= link_to "View Entry", @journal_entry, class: "bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" %>
+      <%= link_to "Back to Entries", journal_entries_path, class: "bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded" %>
+    </div>
+  </div>
+  
+  <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-8">
+    <div class="mb-6">
+      <div class="text-sm text-gray-500 mb-2">
+        Originally created on <%= @journal_entry.created_at.strftime("%B %d, %Y at %I:%M %p") %>
+      </div>
+      <h2 class="text-lg font-semibold text-gray-800 mb-2">Update ABC Analysis</h2>
+      <p class="text-sm text-gray-600">
+        Revise with objective, observable events only. Focus on what actually happened, not feelings or interpretations.
+      </p>
+    </div>
+    
+    <%= render 'form', journal_entry: @journal_entry %>
+  </div>
+</div>

@@ -1,0 +1,45 @@
+<%= form_with(model: journal_entry, class: "space-y-6") do |form| %>
+  <% if journal_entry.errors.any? %>
+    <div class="bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+      <strong class="font-bold">Please fix the following errors:</strong>
+      <ul class="list-disc list-inside mt-2">
+        <% journal_entry.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="bg-red-50 border border-red-200 rounded-lg p-6">
+    <%= form.label :antecedent, "Antecedent", class: "block text-sm font-medium text-red-800 mb-2" %>
+    <p class="text-xs text-red-600 mb-3">What happened immediately before the behavior? (Observable environmental events only)</p>
+    <%= form.text_area :antecedent, 
+        placeholder: "e.g., Received urgent email from client at 4:30 PM",
+        class: "mt-1 block w-full px-3 py-2 border border-red-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500",
+        rows: 4 %>
+  </div>
+
+  <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+    <%= form.label :behavior, "Behavior", class: "block text-sm font-medium text-blue-800 mb-2" %>
+    <p class="text-xs text-blue-600 mb-3">What specific, measurable action did you take? (Objective description only)</p>
+    <%= form.text_area :behavior, 
+        placeholder: "e.g., Stopped current task, prioritized email response, completed reply within 15 minutes",
+        class: "mt-1 block w-full px-3 py-2 border border-blue-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500",
+        rows: 4 %>
+  </div>
+
+  <div class="bg-green-50 border border-green-200 rounded-lg p-6">
+    <%= form.label :consequence, "Consequence", class: "block text-sm font-medium text-green-800 mb-2" %>
+    <p class="text-xs text-green-600 mb-3">What happened immediately after the behavior? (Observable outcomes only)</p>
+    <%= form.text_area :consequence, 
+        placeholder: "e.g., Client responded with appreciation within 30 minutes, project deadline extended by 2 days",
+        class: "mt-1 block w-full px-3 py-2 border border-green-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500",
+        rows: 4 %>
+  </div>
+
+  <div class="flex space-x-3">
+    <%= form.submit "Save Entry", class: "bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline" %>
+    <%= link_to "Cancel", journal_entries_path, class: "bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded" %>
+  </div>
+<% end %>
+
