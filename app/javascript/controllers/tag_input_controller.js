@@ -2,12 +2,29 @@ import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
   static targets = ["input", "list"]
+  static values = { existingTags: Array }
 
   connect() {
     this.selectedTags = new Set()
+    this.selectedTagsData = new Map() // Store tag ID -> tag name mapping
     this.newTags = new Set()
     this.debounceTimer = null
+    
+    // Populate existing tags for edit forms
+    if (this.existingTagsValue && this.existingTagsValue.length > 0) {
+      this.existingTagsValue.forEach(tag => {
+        this.selectedTags.add(tag.id.toString())
+        this.selectedTagsData.set(tag.id.toString(), tag.name)
+      })
+    }
+    
     this.updateHiddenFields()
+    this.displaySelectedTags()
+    
+    // Set up event listeners
+    this.inputTarget.addEventListener('input', this.inputChanged.bind(this))
+    this.inputTarget.addEventListener('keydown', this.handleKeydown.bind(this))
+    this.inputTarget.addEventListener('blur', this.handleBlur.bind(this))
   }
 
   inputChanged() {
@@ -62,7 +79,8 @@ export default class extends Controller {
 
     // Show option to create new tag if query doesn't exactly match any existing tag
     const exactMatch = tags.some(tag => tag.name.toLowerCase() === query.toLowerCase())
-    if (!exactMatch && query.length > 0) {
+    const newTagExists = this.newTags.has(query)
+    if (!exactMatch && !newTagExists && query.length > 0) {
       const newTagElement = this.createTagSuggestion(`Create "${query}"`, 'new', query)
       this.listTarget.appendChild(newTagElement)
     }
@@ -74,18 +92,19 @@ export default class extends Controller {
   }
 
   createTagSuggestion(text, type, value) {
-    const div = document.createElement('div')
-    div.className = 'p-2 hover:bg-purple-100 cursor-pointer border-b border-purple-200 last:border-b-0'
-    div.textContent = text
-    div.dataset.type = type
-    div.dataset.value = value
+    const button = document.createElement('button')
+    button.type = 'button'
+    button.className = 'tag-item autocomplete-suggestion w-full text-left p-2 hover:bg-purple-100 cursor-pointer border-b border-purple-200 last:border-b-0'
+    button.textContent = text
+    button.dataset.type = type
+    button.dataset.value = value
     
-    div.addEventListener('click', (e) => {
+    button.addEventListener('click', (e) => {
       e.preventDefault()
       this.selectTag(type, value, text)
     })
     
-    return div
+    return button
   }
 
   processCommaSeparatedInput(input) {
@@ -109,8 +128,14 @@ export default class extends Controller {
   selectTag(type, value, displayText) {
     if (type === 'existing') {
       this.selectedTags.add(value.toString())
+      // Extract the actual tag name from displayText
+      this.selectedTagsData.set(value.toString(), displayText)
     } else if (type === 'new') {
-      this.newTags.add(value)
+      // For new tags, extract the tag name from "Create "tagname"" format
+      const tagName = type === 'new' && displayText.startsWith('Create "') 
+        ? displayText.slice(8, -1) // Remove 'Create "' and '"'
+        : value
+      this.newTags.add(tagName)
     }
     
     this.inputTarget.value = ''
@@ -132,7 +157,8 @@ export default class extends Controller {
 
     // Display existing selected tags
     this.selectedTags.forEach(tagId => {
-      const tagElement = this.createSelectedTag(`Tag ${tagId}`, 'existing', tagId)
+      const tagName = this.selectedTagsData.get(tagId) || `Tag ${tagId}`
+      const tagElement = this.createSelectedTag(tagName, 'existing', tagId)
       selectedContainer.appendChild(tagElement)
     })
 
@@ -145,7 +171,7 @@ export default class extends Controller {
 
   createSelectedTag(text, type, value) {
     const span = document.createElement('span')
-    span.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800'
+    span.className = 'tag-item inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800'
     
     const textSpan = document.createElement('span')
     textSpan.textContent = text
@@ -153,7 +179,7 @@ export default class extends Controller {
     
     const removeBtn = document.createElement('button')
     removeBtn.type = 'button'
-    removeBtn.className = 'ml-2 text-purple-600 hover:text-purple-800'
+    removeBtn.className = 'remove-tag ml-2 text-purple-600 hover:text-purple-800'
     removeBtn.innerHTML = '×'
     removeBtn.addEventListener('click', (e) => {
       e.preventDefault()
@@ -167,6 +193,7 @@ export default class extends Controller {
   removeTag(type, value) {
     if (type === 'existing') {
       this.selectedTags.delete(value.toString())
+      this.selectedTagsData.delete(value.toString())
     } else if (type === 'new') {
       this.newTags.delete(value)
     }
@@ -222,6 +249,8 @@ export default class extends Controller {
   }
 
   handleKeydown(event) {
+    const suggestions = this.listTarget.querySelectorAll('.autocomplete-suggestion')
+    
     if (event.key === 'Enter') {
       event.preventDefault()
       const query = this.inputTarget.value.trim()
@@ -238,7 +267,43 @@ export default class extends Controller {
           this.selectTag('new', query, query)
         }
       }
+    } else if (event.key === 'Escape') {
+      event.preventDefault()
+      this.clearSuggestions()
+      this.inputTarget.setAttribute('aria-expanded', 'false')
+    } else if (event.key === 'Backspace' && this.inputTarget.value === '') {
+      // Allow removing the last tag with backspace when input is empty
+      const allTags = [...this.selectedTags, ...this.newTags]
+      if (allTags.length > 0) {
+        if (this.newTags.size > 0) {
+          const lastNewTag = [...this.newTags].pop()
+          this.removeTag('new', lastNewTag)
+        } else if (this.selectedTags.size > 0) {
+          const lastSelectedTag = [...this.selectedTags].pop()
+          this.removeTag('existing', lastSelectedTag)
+        }
+      }
     }
+    
+    // Update aria-expanded based on whether suggestions are visible
+    if (suggestions.length > 0) {
+      this.inputTarget.setAttribute('aria-expanded', 'true')
+    } else {
+      this.inputTarget.setAttribute('aria-expanded', 'false')
+    }
+  }
+  
+  handleBlur(event) {
+    // Delay clearing to allow for click events on suggestions
+    setTimeout(() => {
+      const query = this.inputTarget.value.trim()
+      if (query) {
+        // Create new tag on blur if there's text
+        this.selectTag('new', query, query)
+      }
+      this.clearSuggestions()
+      this.inputTarget.setAttribute('aria-expanded', 'false')
+    }, 200)
   }
 }
 

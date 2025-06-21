@@ -4,7 +4,7 @@ RSpec.describe 'Journal Entry Tags', type: :system do
   let(:user) { create(:user) }
   
   before do
-    sign_in user
+    login_as user, scope: :user
   end
   
   describe 'Creating entries with existing tags' do

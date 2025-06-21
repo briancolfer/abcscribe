@@ -22,7 +22,7 @@
       <p>Tags:</p>
       <ul class="flex flex-wrap space-x-2">
         <% @journal_entry.tags.each do |tag| %>
-          <li class="bg-blue-200 text-blue-800 px-2 py-1 rounded"><%= tag.name %></li>
+          <li class="tag bg-blue-200 text-blue-800 px-2 py-1 rounded"><%= tag.name %></li>
         <% end %>
       </ul>
       

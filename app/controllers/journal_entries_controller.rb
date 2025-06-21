@@ -16,12 +16,22 @@ class JournalEntriesController < ApplicationController
     @journal_entry = current_user.journal_entries.build(journal_entry_params)
     
     if @journal_entry.save
+      # Handle existing tags
+      if params[:journal_entry][:tag_ids].present?
+        existing_tags = current_user.tags.where(id: params[:journal_entry][:tag_ids])
+        @journal_entry.tags = existing_tags
+      end
+      
+      # Handle new tags
       if params[:journal_entry][:new_tags].present?
         params[:journal_entry][:new_tags].each do |name|
-          tag = current_user.tags.find_or_create_by(name: name.strip)
+          name = name.strip
+          next if name.blank?
+          tag = current_user.tags.find_or_create_by(name: name)
           @journal_entry.tags << tag unless @journal_entry.tags.include?(tag)
         end
       end
+      
       redirect_to @journal_entry, notice: 'Journal entry was successfully created.'
     else
       render :new, status: :unprocessable_entity
@@ -33,9 +43,21 @@ class JournalEntriesController < ApplicationController
 
   def update
     if @journal_entry.update(journal_entry_params)
+      # Clear existing tags first
+      @journal_entry.tags.clear
+      
+      # Handle existing tags
+      if params[:journal_entry][:tag_ids].present?
+        existing_tags = current_user.tags.where(id: params[:journal_entry][:tag_ids])
+        @journal_entry.tags = existing_tags
+      end
+      
+      # Handle new tags
       if params[:journal_entry][:new_tags].present?
         params[:journal_entry][:new_tags].each do |name|
-          tag = current_user.tags.find_or_create_by(name: name.strip)
+          name = name.strip
+          next if name.blank?
+          tag = current_user.tags.find_or_create_by(name: name)
           @journal_entry.tags << tag unless @journal_entry.tags.include?(tag)
         end
       end
@@ -57,7 +79,7 @@ class JournalEntriesController < ApplicationController
   end
   
   def journal_entry_params
-    params.require(:journal_entry).permit(:antecedent, :behavior, :consequence,
+    params.require(:journal_entry).permit(:antecedent, :behavior, :consequence, :tag_ids, :new_tags,
       tag_ids: [], new_tags: [])
   end
 end

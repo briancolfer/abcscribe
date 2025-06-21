@@ -4,7 +4,7 @@ RSpec.describe 'Tag Autocomplete and Token Creation', type: :system do
   let(:user) { create(:user) }
   
   before do
-    sign_in user
+    login_as user, scope: :user
   end
   
   describe 'Autocomplete functionality' do
@@ -346,8 +346,9 @@ RSpec.describe 'Tag Autocomplete and Token Creation', type: :system do
       tag_input = find('[data-tag-input-target="input"]')
       
       # Check for accessibility attributes
-      expect(tag_input['role']).to eq('combobox') if tag_input.has_attribute?('role')
-      expect(tag_input['aria-expanded']).to be_in(['true', 'false']) if tag_input.has_attribute?('aria-expanded')
+      expect(tag_input['role']).to eq('combobox')
+      expect(tag_input['aria-expanded']).to be_in(['true', 'false'])
+      expect(tag_input['aria-autocomplete']).to eq('list')
     end
     
     it 'supports screen reader announcements', js: true do

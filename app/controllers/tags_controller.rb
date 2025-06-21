@@ -2,8 +2,16 @@ class TagsController < ApplicationController
   before_action :authenticate_user!
   
   def index
-    @tags = current_user.tags.where("name LIKE ?", "%#{params[:q]}%")
-    render json: @tags.select(:id, :name)
+    query = params[:q].to_s.strip
+    if query.present?
+      @tags = current_user.tags
+                         .where("LOWER(name) LIKE ?", "%#{query.downcase}%")
+                         .limit(10)
+                         .order(:name)
+      render json: @tags.select(:id, :name)
+    else
+      render json: []
+    end
   end
 
   def create
