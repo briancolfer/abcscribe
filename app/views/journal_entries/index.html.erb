@@ -44,6 +44,13 @@
                 <p class="text-gray-700 text-sm"><%= truncate(entry.consequence, length: 100) %></p>
               </div>
             </div>
+            
+            <p>Tags:</p>
+            <ul class="flex flex-wrap space-x-2">
+              <% entry.tags.each do |tag| %>
+                <li class="bg-blue-200 text-blue-800 px-2 py-1 rounded"><%= tag.name %></li>
+              <% end %>
+            </ul>
           </div>
         </div>
       <% end %>

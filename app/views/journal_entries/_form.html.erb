@@ -37,6 +37,17 @@
         rows: 4 %>
   </div>
 
+  <div class="bg-purple-50 border border-purple-200 rounded-lg p-6">
+    <div data-controller="tag-input"
+         data-tag-input-url-value="<%= tags_path %>">
+      <label class="block text-sm font-medium text-purple-800 mb-2">Tags</label>
+      <input type="text" name="tag_names" data-tag-input-target="input" placeholder="Start typing..." class="mt-1 block w-full px-3 py-2 border border-purple-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500">
+      <div data-tag-input-target="list" class="mt-2"></div>
+    </div>
+    <%= form.hidden_field :tag_ids, multiple: true, id: "journal_entry_tag_ids" %>
+    <%= form.hidden_field :new_tags, multiple: true, id: "journal_entry_new_tags" %>
+  </div>
+
   <div class="flex space-x-3">
     <%= form.submit "Save Entry", class: "bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline" %>
     <%= link_to "Cancel", journal_entries_path, class: "bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded" %>

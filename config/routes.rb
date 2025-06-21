@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resources :tags, only: [:index, :create, :edit, :update]
   resources :journal_entries
   get "home/index"
   devise_for :users

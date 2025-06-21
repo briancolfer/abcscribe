@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_21_172554) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_21_175804) do
   create_table "journal_entries", force: :cascade do |t|
     t.string "antecedent"
     t.string "behavior"
@@ -19,6 +19,25 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_21_172554) do
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
     t.index ["user_id"], name: "index_journal_entries_on_user_id"
+  end
+
+  create_table "journal_entry_tags", force: :cascade do |t|
+    t.integer "journal_entry_id", null: false
+    t.integer "tag_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["journal_entry_id", "tag_id"], name: "index_journal_entry_tags_on_journal_entry_id_and_tag_id", unique: true
+    t.index ["journal_entry_id"], name: "index_journal_entry_tags_on_journal_entry_id"
+    t.index ["tag_id"], name: "index_journal_entry_tags_on_tag_id"
+  end
+
+  create_table "tags", force: :cascade do |t|
+    t.string "name"
+    t.integer "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id", "name"], name: "index_tags_on_user_id_and_name", unique: true
+    t.index ["user_id"], name: "index_tags_on_user_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -34,4 +53,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_21_172554) do
   end
 
   add_foreign_key "journal_entries", "users"
+  add_foreign_key "journal_entry_tags", "journal_entries"
+  add_foreign_key "journal_entry_tags", "tags"
+  add_foreign_key "tags", "users"
 end

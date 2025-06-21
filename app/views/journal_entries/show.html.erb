@@ -19,6 +19,13 @@
         <% end %>
       </div>
       
+      <p>Tags:</p>
+      <ul class="flex flex-wrap space-x-2">
+        <% @journal_entry.tags.each do |tag| %>
+          <li class="bg-blue-200 text-blue-800 px-2 py-1 rounded"><%= tag.name %></li>
+        <% end %>
+      </ul>
+      
       <div class="space-y-6">
         <div class="bg-red-50 border-l-4 border-red-400 p-6 rounded-r-lg">
           <h3 class="text-lg font-semibold text-red-800 mb-3">Antecedent</h3>

@@ -16,6 +16,12 @@ class JournalEntriesController < ApplicationController
     @journal_entry = current_user.journal_entries.build(journal_entry_params)
     
     if @journal_entry.save
+      if params[:journal_entry][:new_tags].present?
+        params[:journal_entry][:new_tags].each do |name|
+          tag = current_user.tags.find_or_create_by(name: name.strip)
+          @journal_entry.tags << tag unless @journal_entry.tags.include?(tag)
+        end
+      end
       redirect_to @journal_entry, notice: 'Journal entry was successfully created.'
     else
       render :new, status: :unprocessable_entity
@@ -27,6 +33,12 @@ class JournalEntriesController < ApplicationController
 
   def update
     if @journal_entry.update(journal_entry_params)
+      if params[:journal_entry][:new_tags].present?
+        params[:journal_entry][:new_tags].each do |name|
+          tag = current_user.tags.find_or_create_by(name: name.strip)
+          @journal_entry.tags << tag unless @journal_entry.tags.include?(tag)
+        end
+      end
       redirect_to @journal_entry, notice: 'Journal entry was successfully updated.'
     else
       render :edit, status: :unprocessable_entity
@@ -45,6 +57,7 @@ class JournalEntriesController < ApplicationController
   end
   
   def journal_entry_params
-    params.require(:journal_entry).permit(:antecedent, :behavior, :consequence)
+    params.require(:journal_entry).permit(:antecedent, :behavior, :consequence,
+      tag_ids: [], new_tags: [])
   end
 end
