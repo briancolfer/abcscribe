@@ -8,7 +8,7 @@ RSpec.describe "home/index.html.erb", type: :view do
     end
 
     it "displays the welcome message" do
-      expect(rendered).to include("Welcome to Abscribe")
+      expect(rendered).to include("Welcome to Abcscribe")
     end
 
     it "shows sign in prompt" do
@@ -37,7 +37,7 @@ RSpec.describe "home/index.html.erb", type: :view do
     end
 
     it "displays the welcome message" do
-      expect(rendered).to include("Welcome to Abscribe")
+      expect(rendered).to include("Welcome to Abcscribe")
     end
 
     it "shows user greeting" do
