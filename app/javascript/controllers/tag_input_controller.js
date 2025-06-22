@@ -25,6 +25,16 @@ export default class extends Controller {
     this.inputTarget.addEventListener('input', this.inputChanged.bind(this))
     this.inputTarget.addEventListener('keydown', this.handleKeydown.bind(this))
     this.inputTarget.addEventListener('blur', this.handleBlur.bind(this))
+    
+    // Add form submission listener to ensure hidden fields are updated
+    const form = this.element.closest('form')
+    if (form) {
+      form.addEventListener('submit', this.handleFormSubmit.bind(this))
+    }
+  }
+  
+  handleFormSubmit(event) {
+    this.updateHiddenFields()
   }
 
   inputChanged() {
@@ -203,39 +213,33 @@ export default class extends Controller {
   }
 
   updateHiddenFields() {
-    // Update existing tag IDs
-    const tagIdsField = document.getElementById('journal_entry_tag_ids')
-    if (tagIdsField) {
-      // Remove existing hidden inputs
-      const existingInputs = document.querySelectorAll('input[name="journal_entry[tag_ids][]"]')
-      existingInputs.forEach(input => input.remove())
-      
-      // Add new hidden inputs for each selected tag
-      this.selectedTags.forEach(tagId => {
-        const hiddenInput = document.createElement('input')
-        hiddenInput.type = 'hidden'
-        hiddenInput.name = 'journal_entry[tag_ids][]'
-        hiddenInput.value = tagId
-        tagIdsField.parentNode.appendChild(hiddenInput)
-      })
+    // Remove all existing tag-related hidden inputs
+    const existingTagInputs = document.querySelectorAll('input[name="journal_entry[tag_ids][]"], input[name="journal_entry[new_tags][]"]')
+    existingTagInputs.forEach(input => input.remove())
+    
+    // Get the form element to append hidden fields to
+    const form = this.element.closest('form')
+    if (!form) {
+      return
     }
-
-    // Update new tags
-    const newTagsField = document.getElementById('journal_entry_new_tags')
-    if (newTagsField) {
-      // Remove existing hidden inputs
-      const existingInputs = document.querySelectorAll('input[name="journal_entry[new_tags][]"]')
-      existingInputs.forEach(input => input.remove())
-      
-      // Add new hidden inputs for each new tag
-      this.newTags.forEach(tagName => {
-        const hiddenInput = document.createElement('input')
-        hiddenInput.type = 'hidden'
-        hiddenInput.name = 'journal_entry[new_tags][]'
-        hiddenInput.value = tagName
-        newTagsField.parentNode.appendChild(hiddenInput)
-      })
-    }
+    
+    // Add hidden inputs for each selected existing tag
+    this.selectedTags.forEach(tagId => {
+      const hiddenInput = document.createElement('input')
+      hiddenInput.type = 'hidden'
+      hiddenInput.name = 'journal_entry[tag_ids][]'
+      hiddenInput.value = tagId
+      form.appendChild(hiddenInput)
+    })
+    
+    // Add hidden inputs for each new tag
+    this.newTags.forEach(tagName => {
+      const hiddenInput = document.createElement('input')
+      hiddenInput.type = 'hidden'
+      hiddenInput.name = 'journal_entry[new_tags][]'
+      hiddenInput.value = tagName
+      form.appendChild(hiddenInput)
+    })
   }
 
   clearSuggestions() {
