@@ -76,22 +76,34 @@ export default class extends Controller {
   displaySuggestions(tags, query) {
     this.listTarget.innerHTML = ''
     
-    // Show existing tags that match
+    // Show existing tags that match (limited to prevent too many suggestions)
     const existingTags = tags.filter(tag => 
       tag.name.toLowerCase().includes(query.toLowerCase()) && 
       !this.selectedTags.has(tag.id.toString())
     )
 
-    existingTags.forEach(tag => {
+    // Limit existing tags to 10 to ensure reasonable performance and UX
+    const limitedExistingTags = existingTags.slice(0, 10)
+    
+    limitedExistingTags.forEach(tag => {
       const tagElement = this.createTagSuggestion(tag.name, 'existing', tag.id)
       this.listTarget.appendChild(tagElement)
     })
 
-    // Show option to create new tag if query doesn't exactly match any existing tag
+    // Show option to create new tag if:
+    // 1. Query doesn't exactly match any existing tag (case-insensitive)
+    // 2. New tag with this name doesn't already exist in selected new tags
+    // 3. Query is not empty
+    // 4. We haven't hit the display limit already
+    // 5. No existing tags match (including partial matches) to avoid confusion
     const exactMatch = tags.some(tag => tag.name.toLowerCase() === query.toLowerCase())
-    const newTagExists = this.newTags.has(query)
-    if (!exactMatch && !newTagExists && query.length > 0) {
-      const newTagElement = this.createTagSuggestion(`Create "${query}"`, 'new', query)
+    const newTagExists = this.newTags.has(query.trim())
+    const trimmedQuery = query.trim()
+    
+    // Only show "Create" option if there are no existing matching tags at all
+    // This prevents confusion when there are partial matches
+    if (!exactMatch && !newTagExists && trimmedQuery.length > 0 && limitedExistingTags.length === 0) {
+      const newTagElement = this.createTagSuggestion(`Create "${trimmedQuery}"`, 'new', trimmedQuery)
       this.listTarget.appendChild(newTagElement)
     }
 
