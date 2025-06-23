@@ -61,6 +61,18 @@ RSpec.configure do |config|
   # examples within a transaction, remove the following line or assign false
   # instead of true.
   config.use_transactional_fixtures = true
+  
+  # For system tests, Rails 8 automatically handles database cleanup
+  # Just ensure we reset sessions to avoid state pollution
+  config.before(:each, type: :system) do
+    # Clear any existing sessions
+    Capybara.reset_sessions!
+  end
+  
+  config.after(:each, type: :system) do
+    # Reset Capybara sessions to avoid state pollution between tests
+    Capybara.reset_sessions!
+  end
 
   # You can uncomment this line to turn off ActiveRecord support entirely.
   # config.use_active_record = false

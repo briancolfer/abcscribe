@@ -1,75 +1,78 @@
 require 'rails_helper'
 
 RSpec.describe 'Tag Autocomplete and Token Creation', type: :system do
-  let(:user) { create(:user) }
+  # The journal entry test data shared context is automatically included
+  # The journal entry helpers module is automatically included
+  # The authentication test data shared context is automatically included
+  # The authentication helpers module is automatically included
   
   before do
-    login_as user, scope: :user
+    sign_in_user(current_user)
   end
   
   describe 'Autocomplete functionality' do
-    let!(:productivity_tag) { create(:tag, name: 'productivity', user: user) }
-    let!(:progress_tag) { create(:tag, name: 'progress', user: user) }
-    let!(:personal_tag) { create(:tag, name: 'personal', user: user) }
-    let!(:work_tag) { create(:tag, name: 'work', user: user) }
+    let!(:existing_productivity_tag) { productivity_tag }
+    let!(:existing_progress_tag) { progress_tag }
+    let!(:existing_personal_tag) { personal_tag }
+    let!(:existing_work_tag) { work_tag }
     
     it 'shows matching suggestions as user types', js: true do
-      visit new_journal_entry_path
+      visit_new_journal_entry_page
       
-      tag_input = find('[data-tag-input-target="input"]')
+      tag_input = get_tag_input
       
       # Test progressive filtering
       tag_input.fill_in with: 'p'
-      expect(page).to have_content('productivity')
-      expect(page).to have_content('progress')
-      expect(page).to have_content('personal')
-      expect(page).not_to have_content('work')
+      expect_autocomplete_suggestion(productivity_tag_name)
+      expect_autocomplete_suggestion(progress_tag_name)
+      expect_autocomplete_suggestion(personal_tag_name)
+      expect(page).not_to have_content(work_tag_name)
       
       # More specific filter
       tag_input.fill_in with: 'pro'
-      expect(page).to have_content('productivity')
-      expect(page).to have_content('progress')
-      expect(page).not_to have_content('personal')
-      expect(page).not_to have_content('work')
+      expect_autocomplete_suggestion(productivity_tag_name)
+      expect_autocomplete_suggestion(progress_tag_name)
+      expect(page).not_to have_content(personal_tag_name)
+      expect(page).not_to have_content(work_tag_name)
       
       # Even more specific
       tag_input.fill_in with: 'prod'
-      expect(page).to have_content('productivity')
-      expect(page).not_to have_content('progress')
-      expect(page).not_to have_content('personal')
-      expect(page).not_to have_content('work')
+      expect_autocomplete_suggestion(productivity_tag_name)
+      expect(page).not_to have_content(progress_tag_name)
+      expect(page).not_to have_content(personal_tag_name)
+      expect(page).not_to have_content(work_tag_name)
     end
     
     it 'performs case-insensitive matching', js: true do
-      visit new_journal_entry_path
+      visit_new_journal_entry_page
       
-      tag_input = find('[data-tag-input-target="input"]')
+      tag_input = get_tag_input
       
       # Test uppercase input
       tag_input.fill_in with: 'PROD'
-      expect(page).to have_content('productivity')
+      expect_autocomplete_suggestion(productivity_tag_name)
       
       # Test mixed case
       tag_input.fill_in with: 'PrOd'
-      expect(page).to have_content('productivity')
+      expect_autocomplete_suggestion(productivity_tag_name)
     end
     
     it 'shows suggestions for partial matches anywhere in the tag name', js: true do
-      create(:tag, name: 'deep-work', user: user)
+      create(:tag, name: deep_work_tag_name, user: current_user)
       
-      visit new_journal_entry_path
+      visit_new_journal_entry_page
       
-      tag_input = find('[data-tag-input-target="input"]')
+      tag_input = get_tag_input
       tag_input.fill_in with: 'work'
       
-      expect(page).to have_content('work')
-      expect(page).to have_content('deep-work')
+      expect_autocomplete_suggestion(work_tag_name)
+      expect_autocomplete_suggestion(deep_work_tag_name)
     end
     
     it 'limits the number of suggestions shown', js: true do
       # Create many tags with similar names
       15.times do |i|
-        create(:tag, name: "project-#{i}", user: user)
+        create(:tag, name: "project-#{i}", user: current_user)
       end
       
       visit new_journal_entry_path
@@ -106,7 +109,7 @@ RSpec.describe 'Tag Autocomplete and Token Creation', type: :system do
   
   describe 'Token creation and management' do
     it 'creates tokens when selecting from autocomplete', js: true do
-      create(:tag, name: 'productivity', user: user)
+      create(:tag, name: 'productivity', user: current_user)
       
       visit new_journal_entry_path
       
@@ -260,9 +263,9 @@ RSpec.describe 'Tag Autocomplete and Token Creation', type: :system do
   end
   
   describe 'Keyboard navigation' do
-    let!(:tag1) { create(:tag, name: 'alpha', user: user) }
-    let!(:tag2) { create(:tag, name: 'beta', user: user) }
-    let!(:tag3) { create(:tag, name: 'gamma', user: user) }
+    let!(:tag1) { create(:tag, name: 'alpha', user: current_user) }
+    let!(:tag2) { create(:tag, name: 'beta', user: current_user) }
+    let!(:tag3) { create(:tag, name: 'gamma', user: current_user) }
     
     it 'allows navigating suggestions with arrow keys', js: true do
       visit new_journal_entry_path

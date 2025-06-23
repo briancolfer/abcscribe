@@ -3,17 +3,18 @@ require 'rails_helper'
 RSpec.describe 'Password Recovery', type: :system do
   # The authentication test data shared context is automatically included
   # The authentication helpers module is automatically included
+  # The password recovery helpers module is automatically included
   
-  let!(:user) { create(:user, email: valid_email, password: valid_password) }
-  let(:new_password) { 'NewSecurePassword123!' }
+  let(:user) { create(:user, email: valid_email, password: valid_password) }
+  let(:new_password) { strong_password }
   let(:different_password) { 'DifferentPassword456!' }
   let(:invalid_token) { 'invalid_token_123' }
   
   describe 'visiting the forgot password page' do
     it 'displays the forgot password form' do
-      visit new_user_password_path
+      visit_forgot_password_page
       
-      expect(page).to have_content('Forgot your password?')
+      expect_to_be_on_forgot_password_page
       expect(page).to have_field('Email')
       expect(page).to have_button('Send me reset password instructions')
       expect(page).to have_link('Log in')
@@ -21,66 +22,55 @@ RSpec.describe 'Password Recovery', type: :system do
     end
     
     it 'can be accessed from the sign in page' do
-      visit new_user_session_path
+      visit_sign_in_page
       
-      expect(page).to have_link('Forgot your password?')
+      # Wait for the page to fully load and check that we're on the right page
+      expect(page).to have_content('Sign in to your account')
+      
+      # Look for the forgot password link with more specific waiting
+      expect(page).to have_link('Forgot your password?', wait: 10)
       
       click_link 'Forgot your password?'
       
-      # The important thing is that we can access the forgot password form
-      expect(page).to have_content('Forgot your password?')
+      expect_to_be_on_forgot_password_page
     end
   end
   
   describe 'submitting password reset request' do
     before do
-      # Clear any existing emails
-      ActionMailer::Base.deliveries.clear
+      clear_emails
     end
     
     context 'with valid email' do
       it 'sends password reset email and shows success message' do
-        visit new_user_password_path
-        fill_in 'Email', with: valid_email
-        click_button 'Send me reset password instructions'
+        # Ensure user exists before test
+        user
         
-        # Assert flash message
-        expect(page).to have_content('You will receive an email with instructions on how to reset your password in a few minutes.')
+        complete_forgot_password_request(email: valid_email)
         
-        # Verify email was sent
-        expect(ActionMailer::Base.deliveries.count).to eq(1)
-        
-        email = ActionMailer::Base.deliveries.last
-        expect(email.to).to include(valid_email)
-        expect(email.subject).to include('Reset password instructions')
-        expect(email.body.to_s).to include('Change my password')
-        
-        # Verify user's reset password token was set
-        user.reload
-        expect(user.reset_password_token).to be_present
-        expect(user.reset_password_sent_at).to be_present
+        expect_forgot_password_success
+        expect_password_reset_email_sent(valid_email)
+        expect_reset_token_to_be_set(user)
       end
       
-      it 'stays on password reset page after successful submission' do
-        visit new_user_password_path
-        fill_in 'Email', with: valid_email
-        click_button 'Send me reset password instructions'
+      it 'redirects appropriately after successful submission' do
+        # Create a fresh user for this test to avoid state pollution
+        fresh_user = create(:user, email: unique_email, password: valid_password)
         
-        # Based on the test results, it stays on the password reset page
-        expect(current_path).to eq(new_user_password_path)
-        expect(page).to have_content('You will receive an email with instructions on how to reset your password in a few minutes.')
+        complete_forgot_password_request(email: fresh_user.email)
+        
+        expect_forgot_password_success
+        # Devise typically redirects to sign_in after successful password reset request
+        expect(current_path).to eq(new_user_session_path)
       end
     end
     
     context 'with invalid email' do
       it 'shows error message for non-existent email' do
-        visit new_user_password_path
-        fill_in 'Email', with: nonexistent_email
-        click_button 'Send me reset password instructions'
+        complete_forgot_password_request(email: nonexistent_email)
         
-        # Devise shows an error for non-existent emails in this configuration
-        expect(page).to have_content('Email not found')
-        expect(ActionMailer::Base.deliveries.count).to eq(0)
+        expect_forgot_password_error('Email not found')
+        expect_no_password_reset_email_sent
       end
       
       it 'shows error message for blank email' do
@@ -293,6 +283,9 @@ RSpec.describe 'Password Recovery', type: :system do
       it 'can extract reset link from email and complete password reset' do
         # Clear any existing emails
         ActionMailer::Base.deliveries.clear
+        
+        # Ensure user exists before test
+        user
         
         # Request password reset through the form
         visit new_user_password_path

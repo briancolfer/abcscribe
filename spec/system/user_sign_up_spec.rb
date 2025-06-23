@@ -15,42 +15,20 @@ RSpec.describe "User sign up", type: :system do
     end
     
     it "successfully completes signup flow with all requirements" do
-      # Store initial user count
-      initial_user_count = User.count
+      # Use unique email from shared context
+      test_email = unique_email
+      initial_count = User.count
       
-      # Use a unique email for this test
-      test_email = "testuser#{SecureRandom.hex(4)}@example.com"
-      test_password = "password123"
+      complete_signup(
+        email: test_email,
+        password: valid_password,
+        password_confirmation: valid_password_confirmation
+      )
       
-      # Fill in form fields
-      visit_signup_page
-      expect_to_be_on_signup_page
+      expect_signup_success_with_user_count_check(test_email)
       
-      fill_in_email(test_email)
-      fill_in_password(test_password)
-      fill_in_password_confirmation(test_password)
-      
-      # Click "Create Account"
-      submit_signup_form
-      
-      # Wait for redirection to complete and check success
-      expect(page).to have_content("Welcome! You have signed up successfully")
-      
-      # Expect user count to increase by 1
-      expect(User.count).to eq(initial_user_count + 1)
-      
-      # Expect redirection to root path
-      expect(current_path).to eq("/")
-      
-      # Expect welcome flash message
-      expect(page).to have_content("Welcome! You have signed up successfully")
-      
-      # Expect user-specific content on the home page
-      expect(page).to have_content("Hello, #{test_email}!")
-      expect(page).to have_link("View Entries")
-      expect(page).to have_link("Create Entry")
-      expect(page).to have_link("Edit Profile")
-      expect(page).to have_link("Sign Out")
+      # Verify user count increased by 1
+      expect(User.count).to eq(initial_count + 1)
       
       # Verify the created user exists in database
       created_user = User.find_by(email: test_email)
@@ -78,7 +56,17 @@ RSpec.describe "User sign up", type: :system do
   
   describe "validation errors" do
     it "shows error for invalid email" do
-      complete_signup(**user_with_invalid_email)
+      visit_signup_page
+      
+      # Use JavaScript to set an invalid email that bypasses HTML5 validation
+      page.execute_script("document.getElementById('user_email').type = 'text'")
+      fill_in_signup_form(
+        email: invalid_email,
+        password: valid_password,
+        password_confirmation: valid_password_confirmation
+      )
+      
+      submit_signup_form
       expect_signup_error("Email is invalid")
     end
     
@@ -88,7 +76,11 @@ RSpec.describe "User sign up", type: :system do
     end
     
     it "shows error for missing password" do
-      complete_signup(email: valid_email, password: blank_password, password_confirmation: blank_password)
+      complete_signup(
+        email: valid_email,
+        password: blank_password,
+        password_confirmation: blank_password
+      )
       expect_signup_error("Password can't be blank")
     end
 
@@ -103,8 +95,8 @@ RSpec.describe "User sign up", type: :system do
     end
     
     it "shows error for duplicate email" do
-      # Pre-create a user with the duplicate email using FactoryBot
-      FactoryBot.create(:user, email: duplicate_email)
+      # Pre-create a user with the duplicate email from shared context
+      create(:user, email: duplicate_email)
       
       # Attempt to sign up with the same email
       complete_signup(**user_with_duplicate_email)

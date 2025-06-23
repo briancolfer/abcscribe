@@ -1,131 +1,109 @@
 require 'rails_helper'
 
 RSpec.describe 'Journal Entry Tags', type: :system do
-  let(:user) { create(:user) }
+  # The journal entry test data shared context is automatically included
+  # The journal entry helpers module is automatically included
+  # The authentication test data shared context is automatically included
+  # The authentication helpers module is automatically included
   
   before do
-    login_as user, scope: :user
+    sign_in_user(current_user)
   end
   
   describe 'Creating entries with existing tags' do
-    let!(:existing_tag1) { create(:tag, name: 'productivity', user: user) }
-    let!(:existing_tag2) { create(:tag, name: 'work', user: user) }
+    let!(:existing_productivity_tag) { productivity_tag }
+    let!(:existing_work_tag) { work_tag }
     
     it 'allows selecting existing tags when creating a new entry', js: true do
-      visit new_journal_entry_path
+      visit_new_journal_entry_page
       
-      fill_in 'Antecedent', with: 'Manager assigned urgent project'
-      fill_in 'Behavior', with: 'Created priority list and timeline'
-      fill_in 'Consequence', with: 'Project completed on schedule'
+      fill_in_journal_entry_form(**valid_journal_entry_attributes)
       
       # Test autocomplete with existing tags
-      tag_input = find('[data-tag-input-target="input"]')
-      tag_input.fill_in with: 'prod'
-      
-      # Wait for autocomplete suggestions to appear
-      expect(page).to have_content('productivity')
-      
-      # Click on the suggestion
-      find('button', text: 'productivity').click
+      add_tag_by_autocomplete('prod', productivity_tag_name)
       
       # Verify tag was added to the form
-      expect(page).to have_css('.tag-item', text: 'productivity')
+      expect_tag_to_be_present(productivity_tag_name)
       
-      click_button 'Save Entry'
+      submit_journal_entry_form
       
-      expect(page).to have_content('Journal entry was successfully created.')
-      expect(page).to have_content('productivity')
+      expect_journal_entry_creation_success
+      expect_tag_in_entry_display(productivity_tag_name)
     end
     
     it 'allows selecting multiple existing tags', js: true do
-      visit new_journal_entry_path
+      visit_new_journal_entry_page
       
-      fill_in 'Antecedent', with: 'Team meeting scheduled'
-      fill_in 'Behavior', with: 'Prepared agenda and materials'
-      fill_in 'Consequence', with: 'Meeting ran efficiently'
-      
-      tag_input = find('[data-tag-input-target="input"]')
+      fill_in_journal_entry_form(**meeting_journal_entry_attributes)
       
       # Add first tag
-      tag_input.fill_in with: 'work'
-      find('button', text: 'work').click
+      add_tag_by_autocomplete('work', work_tag_name)
       
       # Add second tag
-      tag_input.fill_in with: 'prod'
-      find('button', text: 'productivity').click
+      add_tag_by_autocomplete('prod', productivity_tag_name)
       
-      expect(page).to have_css('.tag-item', text: 'work')
-      expect(page).to have_css('.tag-item', text: 'productivity')
+      expect_tag_to_be_present(work_tag_name)
+      expect_tag_to_be_present(productivity_tag_name)
       
-      click_button 'Save Entry'
+      submit_journal_entry_form
       
-      expect(page).to have_content('Journal entry was successfully created.')
-      expect(page).to have_content('work')
-      expect(page).to have_content('productivity')
+      expect_journal_entry_creation_success
+      expect_tag_in_entry_display(work_tag_name)
+      expect_tag_in_entry_display(productivity_tag_name)
     end
   end
   
   describe 'Creating entries with new tags' do
     it 'allows creating new tags during entry creation', js: true do
-      visit new_journal_entry_path
+      visit_new_journal_entry_page
       
-      fill_in 'Antecedent', with: 'Client called with new requirements'
-      fill_in 'Behavior', with: 'Documented requirements and created plan'
-      fill_in 'Consequence', with: 'Client approved approach'
+      fill_in_journal_entry_form(**client_journal_entry_attributes)
       
-      tag_input = find('[data-tag-input-target="input"]')
-      tag_input.fill_in with: 'client-communication'
-      tag_input.native.send_keys(:return)
+      add_tag_by_typing(new_tag_name)
       
       # Verify new tag appears as a token
-      expect(page).to have_css('.tag-item', text: 'client-communication')
+      expect_tag_to_be_present(new_tag_name)
       
-      click_button 'Save Entry'
+      submit_journal_entry_form
       
-      expect(page).to have_content('Journal entry was successfully created.')
-      expect(page).to have_content('client-communication')
+      expect_journal_entry_creation_success
+      expect_tag_in_entry_display(new_tag_name)
       
       # Verify the tag was actually created in the database
-      expect(user.tags.find_by(name: 'client-communication')).to be_present
+      expect(current_user.tags.find_by(name: new_tag_name)).to be_present
     end
     
     it 'allows mixing existing and new tags', js: true do
-      existing_tag = create(:tag, name: 'meeting', user: user)
+      existing_meeting_tag = meeting_tag
       
-      visit new_journal_entry_path
+      visit_new_journal_entry_page
       
-      fill_in 'Antecedent', with: 'Daily standup started'
-      fill_in 'Behavior', with: 'Shared progress and blocked items'
-      fill_in 'Consequence', with: 'Team aligned on priorities'
-      
-      tag_input = find('[data-tag-input-target="input"]')
+      fill_in_journal_entry_form(**standup_journal_entry_attributes)
       
       # Add existing tag
-      tag_input.fill_in with: 'meet'
-      find('button', text: 'meeting').click
+      add_tag_by_autocomplete('meet', meeting_tag_name)
       
       # Add new tag
-      tag_input.fill_in with: 'team-sync'
-      tag_input.native.send_keys(:return)
+      add_tag_by_typing(team_sync_tag_name)
       
-      expect(page).to have_css('.tag-item', text: 'meeting')
-      expect(page).to have_css('.tag-item', text: 'team-sync')
+      expect_tag_to_be_present(meeting_tag_name)
+      expect_tag_to_be_present(team_sync_tag_name)
       
-      click_button 'Save Entry'
+      submit_journal_entry_form
       
-      expect(page).to have_content('Journal entry was successfully created.')
-      expect(page).to have_content('meeting')
-      expect(page).to have_content('team-sync')
+      expect_journal_entry_creation_success
+      expect_tag_in_entry_display(meeting_tag_name)
+      expect_tag_in_entry_display(team_sync_tag_name)
       
       # Verify new tag was created
-      expect(user.tags.find_by(name: 'team-sync')).to be_present
+      expect(current_user.tags.find_by(name: team_sync_tag_name)).to be_present
     end
   end
   
   describe 'Autocomplete suggestions' do
-    let!(:tag1) { create(:tag, name: 'productivity', user: user) }
-    let!(:tag2) { create(:tag, name: 'progress', user: user) }
-    let!(:tag3) { create(:tag, name: 'personal', user: user) }
+    let!(:tag1) { create(:tag, name: 'productivity', user: current_user) }
+    let!(:tag2) { create(:tag, name: 'progress', user: current_user) }
+    let!(:tag3) { create(:tag, name: 'personal', user: current_user) }
     let!(:other_user_tag) { create(:tag, name: 'productivity', user: create(:user)) }
     
     it 'shows relevant autocomplete suggestions based on input', js: true do
@@ -163,9 +141,9 @@ RSpec.describe 'Journal Entry Tags', type: :system do
   end
   
   describe 'Tag display' do
-    let(:journal_entry) { create(:journal_entry, user: user) }
-    let!(:tag1) { create(:tag, name: 'productivity', user: user) }
-    let!(:tag2) { create(:tag, name: 'work-life-balance', user: user) }
+    let(:journal_entry) { create(:journal_entry, user: current_user) }
+    let!(:tag1) { create(:tag, name: 'productivity', user: current_user) }
+    let!(:tag2) { create(:tag, name: 'work-life-balance', user: current_user) }
     
     before do
       journal_entry.tags << [tag1, tag2]
@@ -190,7 +168,7 @@ RSpec.describe 'Journal Entry Tags', type: :system do
     end
     
     it 'handles long tag names gracefully' do
-      long_tag = create(:tag, name: 'this-is-a-very-long-tag-name-that-might-wrap', user: user)
+      long_tag = create(:tag, name: 'this-is-a-very-long-tag-name-that-might-wrap', user: current_user)
       journal_entry.tags << long_tag
       
       visit journal_entry_path(journal_entry)
@@ -231,8 +209,8 @@ RSpec.describe 'Journal Entry Tags', type: :system do
   end
   
   describe 'Editing entries with tags' do
-    let(:journal_entry) { create(:journal_entry, user: user) }
-    let!(:existing_tag) { create(:tag, name: 'existing', user: user) }
+    let(:journal_entry) { create(:journal_entry, user: current_user) }
+    let!(:existing_tag) { create(:tag, name: 'existing', user: current_user) }
     
     before do
       journal_entry.tags << existing_tag
@@ -336,7 +314,7 @@ RSpec.describe 'Journal Entry Tags', type: :system do
       # but serves as documentation of expected behavior
       expect {
         post tags_path, params: { name: 'malicious-tag' }
-      }.to change(user.tags, :count).by(1)
+      }.to change(current_user.tags, :count).by(1)
       
       expect(other_user.tags.find_by(name: 'malicious-tag')).to be_nil
     end

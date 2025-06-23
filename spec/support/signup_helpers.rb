@@ -52,30 +52,36 @@ module SignupHelpers
     expect(page).to have_link("View Entries")
     expect(page).to have_link("Create Entry")
     expect(page).to have_link("Edit Profile")
-    expect(page).to have_link("Sign Out")
+    expect(page).to have_button("Sign Out") # This is a button_to, not a link
   end
   
   def expect_signup_success_with_user_count_check(expected_email = nil)
-    # Store initial user count
-    initial_count = User.count
-    
-    # Expect user count to increase by 1
-    expect(User.count).to eq(initial_count + 1)
-    
-    # Call standard success expectations
+    # Call standard success expectations first
     expect_signup_success
     
     # If email provided, check that specific email appears
     if expected_email
       expect(page).to have_content(expected_email)
+      # Also verify that a user with this email exists in the database
+      expect(User.find_by(email: expected_email)).to be_present
     end
   end
   
   def expect_signup_error(message = nil)
+    # Ensure we're on the signup page (form should re-render with errors)
+    expect(current_path).to eq("/users/sign_up")
+    
+    # First wait for the error explanation div to appear
+    expect(page).to have_css("#error_explanation")
+    
     if message
-      expect(page).to have_content(message)
+      # Wait for the specific error message to be visible within the error explanation
+      within "#error_explanation" do
+        expect(page).to have_content(message)
+      end
     else
-      expect(page).to have_css(".alert-danger, .error_explanation, .field_with_errors")
+      # Look for error divs if no specific message provided
+      expect(page).to have_css("#error_explanation, .field_with_errors")
     end
   end
   
