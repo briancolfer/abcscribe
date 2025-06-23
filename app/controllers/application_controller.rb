@@ -3,8 +3,17 @@ class ApplicationController < ActionController::Base
   allow_browser versions: :modern
   
   # Devise configuration  
-  before_action :authenticate_user!, unless: :devise_controller?
+  before_action :authenticate_user!
   before_action :configure_permitted_parameters, if: :devise_controller?
+  
+  # Skip authentication for Devise controllers and specific public routes
+  skip_before_action :authenticate_user!, if: :skip_authentication?
+  
+  private
+  
+  def skip_authentication?
+    devise_controller? || controller_name == 'registrations' || controller_name == 'sessions'
+  end
   
   protected
   
