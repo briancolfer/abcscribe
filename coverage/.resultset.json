@@ -25,6 +25,55 @@
           null
         ]
       },
+      "/Users/briancolfer/Projects/abcscribe/app/models/journal_entry.rb": {
+        "lines": [
+          1,
+          1,
+          1,
+          1,
+          null,
+          1,
+          1,
+          1,
+          null,
+          null,
+          1,
+          null,
+          1,
+          0,
+          null,
+          null,
+          1,
+          0,
+          null,
+          null
+        ]
+      },
+      "/Users/briancolfer/Projects/abcscribe/app/models/application_record.rb": {
+        "lines": [
+          1,
+          1,
+          null
+        ]
+      },
+      "/Users/briancolfer/Projects/abcscribe/app/models/journal_entry_tag.rb": {
+        "lines": [
+          1,
+          1,
+          1,
+          null
+        ]
+      },
+      "/Users/briancolfer/Projects/abcscribe/app/models/tag.rb": {
+        "lines": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          null
+        ]
+      },
       "/Users/briancolfer/Projects/abcscribe/app/models/user.rb": {
         "lines": [
           1,
@@ -38,50 +87,45 @@
           null
         ]
       },
-      "/Users/briancolfer/Projects/abcscribe/app/models/application_record.rb": {
-        "lines": [
-          1,
-          1,
-          null
-        ]
-      },
       "/Users/briancolfer/Projects/abcscribe/app/controllers/application_controller.rb": {
         "lines": [
-          1,
+          0,
           null,
-          1,
-          null,
-          null,
-          1,
-          1,
+          0,
           null,
           null,
-          1,
-          null,
-          1,
-          null,
-          1,
-          3,
+          0,
+          0,
           null,
           null,
-          1,
+          0,
           null,
-          1,
-          2,
-          2,
+          0,
           null,
-          null
-        ]
+          0,
+          0,
+          0,
+          null,
+          0,
+          null,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "branches": {}
       },
       "/Users/briancolfer/Projects/abcscribe/app/controllers/home_controller.rb": {
         "lines": [
-          1,
-          1,
+          0,
+          0,
           null,
-          1,
-          null,
-          null
-        ]
+          0,
+          0,
+          0
+        ],
+        "branches": {}
       },
       "/Users/briancolfer/Projects/abcscribe/app/controllers/journal_entries_controller.rb": {
         "lines": [
@@ -219,53 +263,8 @@
           0
         ],
         "branches": {}
-      },
-      "/Users/briancolfer/Projects/abcscribe/app/models/journal_entry.rb": {
-        "lines": [
-          0,
-          0,
-          0,
-          0,
-          null,
-          0,
-          0,
-          0,
-          null,
-          null,
-          0,
-          null,
-          0,
-          0,
-          0,
-          null,
-          0,
-          0,
-          0,
-          0
-        ],
-        "branches": {}
-      },
-      "/Users/briancolfer/Projects/abcscribe/app/models/journal_entry_tag.rb": {
-        "lines": [
-          0,
-          0,
-          0,
-          0
-        ],
-        "branches": {}
-      },
-      "/Users/briancolfer/Projects/abcscribe/app/models/tag.rb": {
-        "lines": [
-          0,
-          0,
-          0,
-          0,
-          0,
-          0
-        ],
-        "branches": {}
       }
     },
-    "timestamp": 1750660876
+    "timestamp": 1750660916
   }
 }
