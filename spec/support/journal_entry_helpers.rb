@@ -95,7 +95,9 @@ module JournalEntryHelpers
   end
   
   def expect_autocomplete_suggestion(tag_name)
-    expect(page).to have_content(tag_name)
+    # Look specifically in the suggestions list
+    suggestion_list = find('[data-tag-input-target="list"]')
+    expect(suggestion_list).to have_content(tag_name)
   end
   
   def expect_no_autocomplete_suggestions

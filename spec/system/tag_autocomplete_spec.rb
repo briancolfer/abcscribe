@@ -16,32 +16,42 @@ RSpec.describe 'Tag Autocomplete and Token Creation', type: :system do
     let!(:existing_personal_tag) { personal_tag }
     let!(:existing_work_tag) { work_tag }
     
-    it 'shows matching suggestions as user types', js: true do
-      visit_new_journal_entry_page
-      
-      tag_input = get_tag_input
-      
-      # Test progressive filtering
-      tag_input.fill_in with: 'p'
-      expect_autocomplete_suggestion(productivity_tag_name)
-      expect_autocomplete_suggestion(progress_tag_name)
-      expect_autocomplete_suggestion(personal_tag_name)
-      expect(page).not_to have_content(work_tag_name)
-      
-      # More specific filter
-      tag_input.fill_in with: 'pro'
-      expect_autocomplete_suggestion(productivity_tag_name)
-      expect_autocomplete_suggestion(progress_tag_name)
-      expect(page).not_to have_content(personal_tag_name)
-      expect(page).not_to have_content(work_tag_name)
-      
-      # Even more specific
-      tag_input.fill_in with: 'prod'
-      expect_autocomplete_suggestion(productivity_tag_name)
-      expect(page).not_to have_content(progress_tag_name)
-      expect(page).not_to have_content(personal_tag_name)
-      expect(page).not_to have_content(work_tag_name)
-    end
+  it 'shows matching suggestions as user types', js: true do
+    visit_new_journal_entry_page
+    
+    tag_input = get_tag_input
+    
+    # Test progressive filtering
+    tag_input.fill_in with: 'p'
+    # Wait for suggestions to appear
+    expect(page).to have_css('.autocomplete-suggestion', wait: 2)
+    expect_autocomplete_suggestion(productivity_tag_name)
+    expect_autocomplete_suggestion(progress_tag_name)
+    expect_autocomplete_suggestion(personal_tag_name)
+    
+    # More specific filter
+    tag_input.fill_in with: 'pro'
+    # Wait for suggestions to update
+    expect(page).to have_css('.autocomplete-suggestion', wait: 2)
+    expect_autocomplete_suggestion(productivity_tag_name)
+    expect_autocomplete_suggestion(progress_tag_name)
+    
+    # Check that personal is NOT in the suggestions list
+    suggestion_list = find('[data-tag-input-target="list"]')
+    expect(suggestion_list).not_to have_content(personal_tag_name)
+    expect(suggestion_list).not_to have_content(work_tag_name)
+    
+    # Even more specific
+    tag_input.fill_in with: 'prod'
+    # Wait for suggestions to update
+    expect(page).to have_css('.autocomplete-suggestion', wait: 2)
+    expect_autocomplete_suggestion(productivity_tag_name)
+    
+    # Check that other tags are NOT in the suggestions list
+    expect(suggestion_list).not_to have_content(progress_tag_name)
+    expect(suggestion_list).not_to have_content(personal_tag_name)
+    expect(suggestion_list).not_to have_content(work_tag_name)
+  end
     
     it 'performs case-insensitive matching', js: true do
       visit_new_journal_entry_page

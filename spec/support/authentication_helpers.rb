@@ -17,12 +17,18 @@ module AuthenticationHelpers
   
   def complete_sign_in(email:, password:, remember_me: false)
     visit_sign_in_page
+    # Wait for page to fully load
+    expect(page).to have_content("Sign in to your account", wait: 5)
+    
     fill_in_sign_in_credentials(
       email: email,
       password: password,
       remember_me: remember_me
     )
     submit_sign_in_form
+    
+    # Wait for redirect to complete
+    sleep(0.5)
   end
   
   # Individual form field helper methods
@@ -44,16 +50,21 @@ module AuthenticationHelpers
   
   # Validation helpers for sign-in success/error states
   def expect_sign_in_success
-    # Check for success message and user-specific content
-    # Note: With Turbo, the redirect might not complete immediately
-    expect(page).to have_content("Signed in successfully").or have_content("Hello,")
+    # Wait for and check either success message or authenticated state
+    # Note: With Turbo, redirects might not complete immediately
+    begin
+      expect(page).to have_content("Signed in successfully", wait: 5)
+    rescue RSpec::Expectations::ExpectationNotMetError
+      # If no success message, check for authenticated state
+      expect(page).to have_content("Hello,", wait: 5)
+    end
     
-    # Expect user-specific content on the home page
-    expect(page).to have_content("Hello,")
-    expect(page).to have_link("View Entries")
-    expect(page).to have_link("Create Entry")
-    expect(page).to have_link("Edit Profile")
-    expect(page).to have_button("Sign Out")
+    # Wait for user-specific content on the home page
+    expect(page).to have_content("Hello,", wait: 5)
+    expect(page).to have_link("View Entries", wait: 5)
+    expect(page).to have_link("Create Entry", wait: 5)
+    expect(page).to have_link("Edit Profile", wait: 5)
+    expect(page).to have_button("Sign Out", wait: 5)
     
     # Should not show sign-in/sign-up links
     expect(page).not_to have_link("Sign In")

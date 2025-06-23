@@ -65,13 +65,17 @@ RSpec.configure do |config|
   # For system tests, Rails 8 automatically handles database cleanup
   # Just ensure we reset sessions to avoid state pollution
   config.before(:each, type: :system) do
-    # Clear any existing sessions
+    # Clear any existing sessions and browser state
     Capybara.reset_sessions!
+    # Reset Warden to clear any authentication state
+    Warden.test_reset!
   end
   
   config.after(:each, type: :system) do
     # Reset Capybara sessions to avoid state pollution between tests
     Capybara.reset_sessions!
+    # Reset Warden to clear any authentication state
+    Warden.test_reset!
   end
 
   # You can uncomment this line to turn off ActiveRecord support entirely.

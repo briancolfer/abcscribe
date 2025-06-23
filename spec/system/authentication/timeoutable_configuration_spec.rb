@@ -6,9 +6,9 @@ require 'rails_helper'
 # 2. Uncomment and configure config.timeout_in in config/initializers/devise.rb
 # 3. Remove the 'skip' from the describe block below
 
-RSpec.describe 'Timeoutable Configuration Example', type: :system, skip: 'Example only - requires timeoutable to be enabled' do
+RSpec.describe 'Session timeout behaviour', type: :system, skip: 'Example only - requires timeoutable to be enabled' do
   # To enable timeoutable functionality, you would need to:
-  # 
+  #
   # 1. Modify app/models/user.rb:
   #    devise :database_authenticatable, :registerable,
   #           :recoverable, :rememberable, :validatable, :timeoutable
