@@ -35,4 +35,9 @@
 
 /app/assets/builds/*
 !/app/assets/builds/.keep
-!/coverage/
+
+# Coverage results
+/coverage/
+/simplecov.json
+/coverage/.resultset.json
+/coverage/index.htm
