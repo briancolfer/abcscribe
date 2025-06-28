@@ -8,7 +8,7 @@ RSpec.describe "home/index.html.erb", type: :view do
     end
 
     it "displays the welcome message" do
-      expect(rendered).to include("Welcome to Abcscribe")
+      expect(rendered).to include("Welcome to ABCScribe")
     end
 
     it "shows sign in prompt" do
@@ -21,7 +21,7 @@ RSpec.describe "home/index.html.erb", type: :view do
     end
 
     it "does not display authenticated user content" do
-      expect(rendered).not_to include("Hello,")
+      expect(rendered).not_to include("Hello:")
       expect(rendered).not_to include("Edit Profile")
       expect(rendered).not_to include("Sign Out")
     end
@@ -37,11 +37,11 @@ RSpec.describe "home/index.html.erb", type: :view do
     end
 
     it "displays the welcome message" do
-      expect(rendered).to include("Welcome to Abcscribe")
+      expect(rendered).to include("Welcome to ABCScribe")
     end
 
     it "shows user greeting" do
-      expect(rendered).to include("Hello, #{user.email}!")
+      expect(rendered).to include("Hello: #{user.email}")
     end
 
     it "displays authenticated user links" do

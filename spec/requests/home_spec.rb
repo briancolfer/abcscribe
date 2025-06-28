@@ -10,7 +10,7 @@ RSpec.describe "Homes", type: :request do
 
       it "displays welcome message" do
         get root_path
-        expect(response.body).to include("Welcome to Abcscribe")
+        expect(response.body).to include("Welcome to ABCScribe")
       end
 
       it "shows sign in and sign up links" do
@@ -22,7 +22,7 @@ RSpec.describe "Homes", type: :request do
 
       it "does not show user-specific content" do
         get root_path
-        expect(response.body).not_to include("Hello,")
+        expect(response.body).not_to include("Hello:")
         expect(response.body).not_to include("Edit Profile")
         expect(response.body).not_to include("Sign Out")
       end
@@ -42,12 +42,12 @@ RSpec.describe "Homes", type: :request do
 
       it "displays welcome message" do
         get root_path
-        expect(response.body).to include("Welcome to Abcscribe")
+        expect(response.body).to include("Welcome to ABCScribe")
       end
 
       it "shows user-specific greeting" do
         get root_path
-        expect(response.body).to include("Hello, #{user.email}!")
+        expect(response.body).to include("Hello: #{user.email}")
       end
 
       it "shows authenticated user links" do
