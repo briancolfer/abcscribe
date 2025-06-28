@@ -47,7 +47,7 @@ module SignupHelpers
     expect(current_path).to eq("/")
     
     # Expect user-specific content on the home page
-    expect(page).to have_content("Hello,")
+    expect(page).to have_content("Hello:")
     expect(page).to have_content("@example.com") # Since we use test emails with example.com
     expect(page).to have_link("View Entries")
     expect(page).to have_link("Create Entry")

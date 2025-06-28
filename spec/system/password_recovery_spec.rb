@@ -5,6 +5,25 @@ RSpec.describe 'Password Recovery', type: :system do
   # The authentication helpers module is automatically included
   # The password recovery helpers module is automatically included
   
+  before do
+    # Ensure we start with a clean slate
+    Capybara.reset_sessions!
+    # Clear all cookies to ensure clean state
+    page.driver.browser.manage.delete_all_cookies if page.driver.respond_to?(:browser)
+    # Reset any user authentication state
+    Warden.test_reset!
+    # Clear any existing emails
+    ActionMailer::Base.deliveries.clear
+  end
+  
+  after do
+    # Clean up after each test
+    Capybara.reset_sessions!
+    page.driver.browser.manage.delete_all_cookies if page.driver.respond_to?(:browser)
+    Warden.test_reset!
+    ActionMailer::Base.deliveries.clear
+  end
+  
   let(:user) { create(:user, email: valid_email, password: valid_password) }
   let(:new_password) { strong_password }
   let(:different_password) { 'DifferentPassword456!' }
@@ -131,7 +150,7 @@ RSpec.describe 'Password Recovery', type: :system do
         expect(current_path).to eq(root_path)
         
         # Verify user can access protected content
-        expect(page).to have_content("Hello, #{valid_email}!")
+        expect(page).to have_content("Hello: #{valid_email}")
         expect(page).to have_button('Sign Out')
         
         # Verify that the password change was successful by checking the user object
@@ -190,7 +209,7 @@ RSpec.describe 'Password Recovery', type: :system do
         
         # User should not be signed in
         expect(page).not_to have_button('Sign Out')
-        expect(page).not_to have_content("Hello, #{valid_email}!")
+        expect(page).not_to have_content("Hello: #{valid_email}")
       end
       
       it 'shows error message for expired token' do
@@ -233,7 +252,7 @@ RSpec.describe 'Password Recovery', type: :system do
         
         # User should not be signed in
         expect(page).not_to have_button('Sign Out')
-        expect(page).not_to have_content("Hello, #{valid_email}!")
+        expect(page).not_to have_content("Hello: #{valid_email}")
         
         # Verify password was not changed
         user.reload
@@ -330,7 +349,7 @@ RSpec.describe 'Password Recovery', type: :system do
         # Verify success
         expect(page).to have_content('Your password has been changed successfully. You are now signed in.')
         expect(current_path).to eq(root_path)
-        expect(page).to have_content("Hello, #{valid_email}!")
+        expect(page).to have_content("Hello: #{valid_email}")
       end
     end
   end
@@ -389,7 +408,7 @@ RSpec.describe 'Password Recovery', type: :system do
       # User should be automatically signed in
       expect(page).to have_content('Your password has been changed successfully. You are now signed in.')
       expect(page).to have_button('Sign Out')
-      expect(page).to have_content("Hello, #{valid_email}!")
+      expect(page).to have_content("Hello: #{valid_email}")
       
       # Should be able to access protected pages
       visit journal_entries_path

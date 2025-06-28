@@ -56,11 +56,11 @@ module AuthenticationHelpers
       expect(page).to have_content("Signed in successfully", wait: 5)
     rescue RSpec::Expectations::ExpectationNotMetError
       # If no success message, check for authenticated state
-      expect(page).to have_content("Hello,", wait: 5)
+      expect(page).to have_content("Hello:", wait: 5)
     end
     
     # Wait for user-specific content on the home page
-    expect(page).to have_content("Hello,", wait: 5)
+    expect(page).to have_content("Hello:", wait: 5)
     expect(page).to have_link("View Entries", wait: 5)
     expect(page).to have_link("Create Entry", wait: 5)
     expect(page).to have_link("Edit Profile", wait: 5)
@@ -105,14 +105,27 @@ module AuthenticationHelpers
   
   # Sign out helper methods
   def sign_out_user
+    # Capture the current user content before signing out
+    current_user_content = nil
+    if page.has_content?("Hello:", wait: 1)
+      # Extract the specific user email from the page
+      user_match = page.text.match(/Hello:\s*([^\s]+)/)
+      current_user_content = user_match[0] if user_match
+    end
+    
     # Handle Turbo-powered sign-out button with async behavior
     click_button "Sign Out"
     
-    # Wait for the sign-out to complete by waiting for user-specific content to disappear
-    # This is more reliable than waiting for specific text that might not appear
-    expect(page).not_to have_content("Hello,", wait: 10)
+    # Wait for the sign-out to complete
+    if current_user_content
+      # Wait for the specific user content to disappear
+      expect(page).not_to have_content(current_user_content, wait: 10)
+    else
+      # Fallback: wait for sign-out button to disappear
+      expect(page).not_to have_button("Sign Out", wait: 10)
+    end
     
-    # Also ensure we're back at root and not showing sign-out button anymore
+    # Ensure we're in a signed-out state
     expect(page).not_to have_button("Sign Out", wait: 5)
   end
   
@@ -124,7 +137,7 @@ module AuthenticationHelpers
     expect(page).to have_link("Sign Up")
     
     # Should not show signed-in user content
-    expect(page).not_to have_content("Hello,")
+    expect(page).not_to have_content("Hello:")
     expect(page).not_to have_link("View Entries")
     expect(page).not_to have_link("Create Entry")
     expect(page).not_to have_link("Edit Profile")

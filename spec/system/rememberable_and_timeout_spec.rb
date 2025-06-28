@@ -10,6 +10,17 @@ RSpec.describe 'Rememberable and Session Timeout', type: :system do
     before do
       # Ensure we start with a clean slate
       Capybara.reset_sessions!
+      # Clear all cookies to ensure clean state
+      page.driver.browser.manage.delete_all_cookies if page.driver.respond_to?(:browser)
+      # Reset any user authentication state
+      Warden.test_reset!
+    end
+    
+    after do
+      # Clean up after each test
+      Capybara.reset_sessions!
+      page.driver.browser.manage.delete_all_cookies if page.driver.respond_to?(:browser)
+      Warden.test_reset!
     end
     
     context 'when remember me is checked' do
@@ -46,16 +57,25 @@ RSpec.describe 'Rememberable and Session Timeout', type: :system do
         )
         expect_sign_in_success
         
+        # Verify remember token was set
+        remember_token_cookie = get_remember_token_cookie
+        expect(remember_token_cookie).not_to be_nil
+        
         # Simulate browser session expiry by clearing session cookies but keeping persistent cookies
         # This simulates what happens when a browser is closed and reopened
-        page.driver.browser.manage.delete_cookie('_abcscribe_session')
+        begin
+          page.driver.browser.manage.delete_cookie('_abcscribe_session')
+        rescue Selenium::WebDriver::Error::NoSuchCookieError
+          # Cookie might not exist, which is fine
+        end
         
         # Visit the application again
         visit root_path
         
         # User should still be logged in due to remember token
+        # Give a bit more time for authentication to process
+        expect(page).to have_content("Hello: #{user.email}", wait: 10)
         expect_user_to_be_signed_in
-        expect(page).to have_content("Hello, #{user.email}!")
       end
       
       it 'allows access to protected pages without re-authentication' do

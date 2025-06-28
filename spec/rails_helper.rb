@@ -48,7 +48,25 @@ RSpec.configure do |config|
   config.include Warden::Test::Helpers, type: :system
   config.after(:each, type: :system) { Warden.test_reset! }
   
-  # Capybara configuration
+  # Capybara configuration for Chrome with system ChromeDriver
+  Capybara.register_driver :selenium_chrome_headless do |app|
+    options = ::Selenium::WebDriver::Chrome::Options.new
+    options.add_argument('--headless')
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
+    options.add_argument('--disable-gpu')
+    options.add_argument('--window-size=1400,1400')
+    
+    # Use system ChromeDriver
+    service = Selenium::WebDriver::Service.chrome(path: '/opt/homebrew/bin/chromedriver')
+    
+    Capybara::Selenium::Driver.new(app, 
+      browser: :chrome, 
+      service: service,
+      options: options
+    )
+  end
+  
   Capybara.default_driver = :selenium_chrome_headless
   Capybara.javascript_driver = :selenium_chrome_headless
   
@@ -61,7 +79,6 @@ RSpec.configure do |config|
   # examples within a transaction, remove the following line or assign false
   # instead of true.
   config.use_transactional_fixtures = true
-  
   # For system tests, Rails 8 automatically handles database cleanup
   # Just ensure we reset sessions to avoid state pollution
   config.before(:each, type: :system) do

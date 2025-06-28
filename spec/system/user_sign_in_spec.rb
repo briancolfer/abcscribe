@@ -29,7 +29,7 @@ RSpec.describe 'User Sign In', type: :system do
       # Verify sign-in success message appears
       expect(page).to have_content('Signed in successfully')
       # Verify user content is displayed
-      expect(page).to have_content("Hello, #{valid_email}!")
+      expect(page).to have_content("Hello: #{valid_email}")
     end
     
     it 'displays user-specific navigation after successful sign-in' do
@@ -39,7 +39,7 @@ RSpec.describe 'User Sign In', type: :system do
       )
       
       # Check presence of user-specific navigation elements
-      expect(page).to have_content("Hello, #{valid_email}!")
+      expect(page).to have_content("Hello: #{valid_email}")
       expect(page).to have_link('View Entries')
       expect(page).to have_link('Create Entry')
       expect(page).to have_link('Edit Profile')
@@ -168,7 +168,7 @@ RSpec.describe 'User Sign In', type: :system do
       expect(page).to have_link('Sign Up')
       
       # Verify that user-specific navigation is not present
-      expect(page).not_to have_content('Hello,')
+      expect(page).not_to have_content('Hello:')
       expect(page).not_to have_link('View Entries')
       expect(page).not_to have_link('Create Entry')
       expect(page).not_to have_link('Edit Profile')

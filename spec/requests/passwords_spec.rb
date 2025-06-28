@@ -198,7 +198,7 @@ RSpec.describe "Passwords", type: :request do
         expect(user.valid_password?(new_password)).to be true
         
         # Verify user is signed in by checking for user-specific content
-        expect(response.body).to include("Hello, #{user.email}!")
+        expect(response.body).to include("Hello: #{user.email}")
         expect(response.body).to include("Sign Out")
         
         # Verify reset token was cleared

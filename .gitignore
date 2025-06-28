@@ -40,4 +40,11 @@
 /coverage/
 /simplecov.json
 /coverage/.resultset.json
+/coverage/.last_run.json
+/coverage/.last_run_timestamp
+
+# Ignore specific coverage reports
+/coverage/.lcov.info
+/coverage/.lcov_report.json
+/coverage/.simplecov.json
 /coverage/index.htm
