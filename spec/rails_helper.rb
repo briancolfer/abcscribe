@@ -38,16 +38,16 @@ end
 RSpec.configure do |config|
   # Include FactoryBot methods
   config.include FactoryBot::Syntax::Methods
-  
+
   # Include Devise test helpers
   config.include Devise::Test::IntegrationHelpers, type: :request
   config.include Devise::Test::ControllerHelpers, type: :controller
   config.include Devise::Test::IntegrationHelpers, type: :system
-  
+
   # Configure warden for system tests
   config.include Warden::Test::Helpers, type: :system
   config.after(:each, type: :system) { Warden.test_reset! }
-  
+
   # Capybara configuration for Chrome with system ChromeDriver
   Capybara.register_driver :selenium_chrome_headless do |app|
     options = ::Selenium::WebDriver::Chrome::Options.new
@@ -56,20 +56,17 @@ RSpec.configure do |config|
     options.add_argument('--disable-dev-shm-usage')
     options.add_argument('--disable-gpu')
     options.add_argument('--window-size=1400,1400')
-    
-    # Use system ChromeDriver
-    service = Selenium::WebDriver::Service.chrome(path: '/opt/homebrew/bin/chromedriver')
-    
-    Capybara::Selenium::Driver.new(app, 
-      browser: :chrome, 
-      service: service,
-      options: options
+
+    Capybara::Selenium::Driver.new(app,
+                                   browser: :chrome,
+                                   service: service,
+                                   options: options
     )
   end
-  
+
   Capybara.default_driver = :selenium_chrome_headless
   Capybara.javascript_driver = :selenium_chrome_headless
-  
+
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
   config.fixture_paths = [
     Rails.root.join('spec/fixtures')
@@ -87,7 +84,7 @@ RSpec.configure do |config|
     # Reset Warden to clear any authentication state
     Warden.test_reset!
   end
-  
+
   config.after(:each, type: :system) do
     # Reset Capybara sessions to avoid state pollution between tests
     Capybara.reset_sessions!
