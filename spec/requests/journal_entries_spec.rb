@@ -47,4 +47,22 @@ RSpec.describe "JournalEntries", type: :request do
       expect(tag_names).to include("ExistingTag", "AnotherTag")
     end
   end
+  # spec/requests/journal_entries_spec.rb
+  describe "PATCH /journal_entries/:id" do
+    let!(:journal_entry) { create(:journal_entry, user: user) }
+
+    it "assigns existing tags on update" do
+      patch "/journal_entries/#{journal_entry.id}", params: {
+        journal_entry: { tag_ids: [existing_tag.id] }
+      }
+      expect(journal_entry.reload.tags).to include(existing_tag)
+    end
+
+    it "creates and assigns new tags on update" do
+      patch "/journal_entries/#{journal_entry.id}", params: {
+        journal_entry: { new_tags: ["UpdatedTag"] }
+      }
+      expect(journal_entry.reload.tags.pluck(:name)).to include("UpdatedTag")
+    end
+  end
 end
