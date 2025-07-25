@@ -80,10 +80,32 @@ RSpec.describe JournalEntry, type: :model do
         expect(subject.errors[:consequence]).to include("can't be blank")
       end
 
-      it 'requires consequence to be at least 10 characters' do
-        subject.consequence = "Brief"
+      it "rejects 'unknown outcome' as an invalid consequence" do
+        subject.consequence = "unknown outcome"
         expect(subject).not_to be_valid
-        expect(subject.errors[:consequence]).to include("is too short (minimum is 10 characters)")
+        expect(subject.errors[:consequence]).to include("use the word 'unknown' only if the consequence is unknown")
+      end
+
+      it 'rejects consequence containing "don\'t know"' do
+        subject.consequence = "I don't know what happened"
+        expect(subject).not_to be_valid
+        expect(subject.errors[:consequence]).to include("use the word 'unknown' only if the consequence is unknown")
+      end
+
+      it "accepts 'unknown' as a valid consequence" do
+        subject.consequence = "unknown"
+        expect(subject).to be_valid
+      end
+
+      it 'requires consequence to be at least 10 characters unless it is "unknown"' do
+        subject.consequence = "Short"
+        expect(subject).not_to be_valid
+        expect(subject.errors[:consequence]).to include("must be at least 10 characters unless it is 'unknown'")
+      end
+
+      it 'is valid with exactly 10 characters' do
+        subject.consequence = "c" * 10
+        expect(subject).to be_valid
       end
 
       it 'allows consequence up to 1000 characters' do
